@@ -96,7 +96,7 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
           data: response.data.data.map(value =>
             Object.assign({ id: value.id }, value.attributes),
           ),
-          total: response.data.meta[settings.total],
+          total: response.data.meta.pagination.totalRows,
         };
       }
 
