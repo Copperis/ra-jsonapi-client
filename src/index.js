@@ -99,7 +99,7 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
             { id: value.id },
             value.attributes,
           )),
-          total: response.data.meta.pagination.totalRows,
+          total: settings.getTotal(response.data.meta),
         };
       }
 
