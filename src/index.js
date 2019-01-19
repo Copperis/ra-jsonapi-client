@@ -79,7 +79,11 @@ export default (apiUrl, userSettings = {}) => async (type, resource, params) => 
 
     case GET_MANY: {
       const query = {
-        filter: JSON.stringify({ id: params.ids }),
+        filter: JSON.stringify({
+          id: {
+            in: params.ids,
+          },
+        }),
       };
       url = `${apiUrl}/${resource}?${stringify(query)}`;
       break;
@@ -93,6 +97,7 @@ export default (apiUrl, userSettings = {}) => async (type, resource, params) => 
 
   const response = await axios({ url, ...options });
   switch (type) {
+    case GET_MANY:
     case GET_LIST: {
       return {
         data: serialize(response.data.data),
