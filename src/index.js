@@ -1,5 +1,6 @@
 import { stringify } from 'qs';
 import merge from 'deepmerge';
+import { deserialise } from 'kitsu-core';
 import axios from 'axios';
 import {
   GET_LIST, GET_ONE, CREATE, UPDATE, DELETE, GET_MANY,
@@ -23,7 +24,7 @@ init();
  * @param {Object} payload Request parameters. Depends on the request type
  * @returns {Promise} the Promise for a data response
  */
-export default (apiUrl, userSettings = {}) => (type, resource, params) => {
+export default (apiUrl, userSettings = {}) => async (type, resource, params) => {
   let url = '';
   const settings = merge(defaultSettings, userSettings);
 
@@ -91,61 +92,58 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
       );
   }
 
-  return axios({ url, ...options }).then((response) => {
-    switch (type) {
-      case GET_LIST: {
-        return {
-          data: response.data.data.map(value => Object.assign(
-            { id: value.id },
-            value.attributes,
-          )),
-          total: settings.getTotal(response.data.meta),
-        };
-      }
-
-      case GET_ONE: {
-        const { id, attributes } = response.data.data;
-
-        return {
-          data: {
-            id,
-            ...attributes,
-          },
-        };
-      }
-
-      case CREATE: {
-        const { id, attributes } = response.data.data;
-
-        return {
-          data: {
-            id,
-            ...attributes,
-          },
-        };
-      }
-
-      case UPDATE: {
-        const { id, attributes } = response.data.data;
-
-        return {
-          data: {
-            id,
-            ...attributes,
-          },
-        };
-      }
-
-      case DELETE: {
-        return {
-          data: { id: params.id },
-        };
-      }
-
-      default:
-        throw new NotImplementedError(
-          `Unsupported Data Provider request type ${type}`,
-        );
+  const response = await axios({ url, ...options });
+  switch (type) {
+    case GET_LIST: {
+      const { data } = await deserialise(response.data);
+      return {
+        data,
+        total: settings.getTotal(response.data.meta),
+      };
     }
-  });
+
+    case GET_ONE: {
+      const { id, attributes } = response.data.data;
+
+      return {
+        data: {
+          id,
+          ...attributes,
+        },
+      };
+    }
+
+    case CREATE: {
+      const { id, attributes } = response.data.data;
+
+      return {
+        data: {
+          id,
+          ...attributes,
+        },
+      };
+    }
+
+    case UPDATE: {
+      const { id, attributes } = response.data.data;
+
+      return {
+        data: {
+          id,
+          ...attributes,
+        },
+      };
+    }
+
+    case DELETE: {
+      return {
+        data: { id: params.id },
+      };
+    }
+
+    default:
+      throw new NotImplementedError(
+        `Unsupported Data Provider request type ${type}`,
+      );
+  }
 };
