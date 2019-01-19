@@ -13,7 +13,7 @@ chai.use(chaiAsPromised);
 const { expect } = chai;
 
 const client = jsonapiClient('http://api.example.com', {
-  total: 'total-count',
+  getTotal: meta => meta['total-count'],
 });
 
 let result;
