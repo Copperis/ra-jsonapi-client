@@ -1,11 +1,10 @@
 import { stringify } from 'qs';
 import merge from 'deepmerge';
-import { deserialise } from 'kitsu-core';
 import axios from 'axios';
 import {
   GET_LIST, GET_ONE, CREATE, UPDATE, DELETE, GET_MANY,
 } from './actions';
-
+import serialize from './serialize';
 import defaultSettings from './default-settings';
 import { NotImplementedError } from './errors';
 import init from './initializer';
@@ -95,9 +94,8 @@ export default (apiUrl, userSettings = {}) => async (type, resource, params) => 
   const response = await axios({ url, ...options });
   switch (type) {
     case GET_LIST: {
-      const { data } = await deserialise(response.data);
       return {
-        data,
+        data: serialize(response.data.data),
         total: settings.getTotal(response.data.meta),
       };
     }
