@@ -1,7 +1,9 @@
 import { stringify } from 'qs';
 import merge from 'deepmerge';
 import axios from 'axios';
-import { GET_LIST, GET_ONE, CREATE, UPDATE, DELETE, GET_MANY } from './actions';
+import {
+  GET_LIST, GET_ONE, CREATE, UPDATE, DELETE, GET_MANY,
+} from './actions';
 
 import defaultSettings from './default-settings';
 import { NotImplementedError } from './errors';
@@ -89,13 +91,14 @@ export default (apiUrl, userSettings = {}) => (type, resource, params) => {
       );
   }
 
-  return axios({ url, ...options }).then(response => {
+  return axios({ url, ...options }).then((response) => {
     switch (type) {
       case GET_LIST: {
         return {
-          data: response.data.data.map(value =>
-            Object.assign({ id: value.id }, value.attributes),
-          ),
+          data: response.data.data.map(value => Object.assign(
+            { id: value.id },
+            value.attributes,
+          )),
           total: response.data.meta.pagination.totalRows,
         };
       }
